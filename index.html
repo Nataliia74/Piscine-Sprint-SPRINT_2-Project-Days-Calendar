@@ -1,9 +1,44 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <script type="module" src="common.mjs"></script>
-        <script type="module" src="web.mjs"></script>
-    </head>
-    <body>
-    </body>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Days Calendar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css" />
+
+  </head>
+  <body>
+    <header >
+      <h1>Days Calendar</h1>
+
+      <button id="prevBtn" type="button" >◀ Prev</button>
+
+      <label for="monthSelect">Month</label>
+      <select id="monthSelect" name="month"></select>
+
+      <label for="yearSelect">Year</label>
+      <select id="yearSelect" name="year"></select>
+
+      <button id="nextBtn" type="button" aria-label="Next month">Next ▶</button>
+    </header>
+
+    <main>
+      <!-- Weekday header row (Monday first) -->
+      <div class="weekday-row" aria-hidden="true">
+        <div class="weekday">Monday</div>
+        <div class="weekday">Tuesday</div>
+        <div class="weekday">Wednesday</div>
+        <div class="weekday">Thursday</div>
+        <div class="weekday">Friday</div>
+        <div class="weekday">Saturday</div>
+        <div class="weekday">Sunday</div>
+      </div>
+
+      <!-- Announcements for screen readers -->
+      <div id="status" ></div>
+
+      <!-- Calendar grid -->
+      <div id="calendar" role="grid" ></div>
+    </main>
+  </body>
 </html>
