@@ -3,8 +3,9 @@
 // Note that when running locally, in order to open a web page which uses modules, you must serve the directory over HTTP e.g. with https://www.npmjs.com/package/http-server
 // You can't open the index.html file using a file:// URL.
 
-import { getGreeting } from "./common.mjs";
+// import { getGreeting } from "./common.mjs";
 import daysData from "./days.json" with { type: "json" };
+import { getCommemorativeDayOfMonth } from "./common.mjs";
 
 const calendar = document.getElementById("calendar");
 const statusEl = document.getElementById("status");
@@ -56,10 +57,9 @@ let displayedMonth = currentMonth;
 function updateCalendar() {
   renderCalendar (displayedYear, displayedMonth)
   yearSelect.value = displayedYear
-   monthSelect.value = displayedMonth
+  monthSelect.value = displayedMonth
+
 }
- 
-  
 
 nextBtn.addEventListener("click", () => {
   
@@ -91,6 +91,7 @@ function daysInMonth(year, month) {
 function renderCalendar(year, month) {
   // Clear any previous calendar content
   calendar.innerHTML = "";
+  const commemorativeDays = getCommemorativeDayOfMonth(year, month, "en");
 
   const numDays = daysInMonth(year, month);
 
@@ -103,17 +104,24 @@ function renderCalendar(year, month) {
     calendar.appendChild(emptyDiv)
   }
 
-
-
- 
-
   for (let day = 1; day <= numDays; day++) {
     const dayDiv = document.createElement("div");
     dayDiv.classList.add("day");
     dayDiv.textContent = day;
+    const commemorative = commemorativeDays.find(d => d.date === day);
+    if(commemorative) {
+      dayDiv.classList.add("commemorative");
+      dayDiv.title = commemorative.name;
+      const label = document.createElement("span");
+      label.classList.add("commemorative-label");
+      label.textContent = commemorative.name;
+      dayDiv.appendChild(label);
+    }
     calendar.appendChild(dayDiv);
   }
-   statusEl.textContent = `${year} - ${month + 1} (${numDays} days)`;
+
+  statusEl.textContent = `${year} - ${month + 1} (${numDays} days)`;
+  
 }
 
 // Render the current month when the page loads

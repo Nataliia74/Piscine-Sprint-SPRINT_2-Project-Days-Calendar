@@ -100,3 +100,10 @@ main {
   border: 1px solid var(--border); /* optional, to match day cells */
   min-height: 80px; /* same height as day cells */
 }
+
+.commemorative-label {
+  font-size: 15px;
+  color: rgb(45, 6, 239);
+  margin: 4px;
+  display: block;
+}
