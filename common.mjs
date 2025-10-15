@@ -7,8 +7,8 @@ import daysData from "./days.json" with { type: "json" };
 // }
 
 
-export function getMonthIndex(monthName, locale = navigator.language) {
-    const monthFormatter = new Intl.DateTimeFormat(locale, {month: "long"});
+export function getMonthIndex(monthName, locale = (typeof navigator !== "undefined" ? navigator.language : "en-GB")) {
+  const monthFormatter = new Intl.DateTimeFormat(locale, {month: "long"});
     const year = new Date().getFullYear();
     const day = 1;
 
@@ -19,8 +19,8 @@ export function getMonthIndex(monthName, locale = navigator.language) {
     throw Error ("There is no such month")
 }
 
-export function getWeekDayIndex(dayName, locale = navigator.language) {
-    const dayFormatter = new Intl.DateTimeFormat(locale, {weekday: "long"});
+export function getWeekDayIndex(dayName, locale = (typeof navigator !== "undefined" ? navigator.language : "en-GB")) {
+  const dayFormatter = new Intl.DateTimeFormat(locale, {weekday: "long"});
     const year = new Date().getFullYear();
     const month = new Date().getMonth();
     const day = 7;
@@ -65,7 +65,7 @@ export function getOccurrenceWeekdayInMonth (year, monthIndex, weekdayIndex, occ
   return null; // if the month doesn’t have that occurrence
 }
 
-export function getCommemorativeDayOfMonth (year, monthIndex, locale = navigator.language) {
+export function getCommemorativeDayOfMonth(year, monthIndex, locale = (typeof navigator !== "undefined" ? navigator.language : "en-GB")) {
   let arrayResults =[];
   // const year = new Date().getFullYear();
 
@@ -80,8 +80,10 @@ export function getCommemorativeDayOfMonth (year, monthIndex, locale = navigator
       if (commemorativeMonthIndex === monthIndex && date!=null) {
         arrayResults.push({
           name: day.name,
-          date: date
-        })
+          date: date,
+          descriptionURL: day.descriptionURL
+
+        });
       }
     } catch (error) {
       console.error(`Error commemorative day "${day.name}":`, error.toString());

@@ -111,18 +111,79 @@ function renderCalendar(year, month) {
     const commemorative = commemorativeDays.find(d => d.date === day);
     if(commemorative) {
       dayDiv.classList.add("commemorative");
-      dayDiv.title = commemorative.name;
+      dayDiv.title = `${commemorative.name} — click for details`;
+
+      // Make the whole cell interactive & accessible
+      dayDiv.tabIndex = 0;
+      dayDiv.setAttribute("role", "button");
+
       const label = document.createElement("span");
       label.classList.add("commemorative-label");
       label.textContent = commemorative.name;
       dayDiv.appendChild(label);
+
+      // Open details on click/keyboard
+      const open = () => showDescription(commemorative, year, month, day);
+      dayDiv.addEventListener("click", open);
+      dayDiv.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          open();
+        }
+      });
     }
     calendar.appendChild(dayDiv);
+  }
+
+  // Fill trailing empty cells to complete a 7×6 grid
+  const totalCells = startDay + numDays;
+  const trailing = 42 - totalCells;
+  for (let i = 0; i < trailing; i++) {
+    const emptyDiv = document.createElement("div");
+    emptyDiv.classList.add("empty");
+    calendar.appendChild(emptyDiv);
   }
 
   statusEl.textContent = `${year} - ${month + 1} (${numDays} days)`;
   
 }
+
+async function showDescription(ev, y, m, d) {
+  try {
+    const res = await fetch(ev.descriptionURL, { cache: "force-cache" });
+    const text = res.ok ? (await res.text()).trim()
+                        : `${ev.name}\n\n(No description available)`;
+
+    const dialog = document.createElement("dialog");
+    dialog.classList.add("modal");
+    dialog.innerHTML = `
+      <div class="modal-content">
+        <h2 class="modal-title">${ev.name} — ${new Date(y, m, d).toDateString()}</h2>
+        <pre class="modal-body">${text}</pre>
+        <div class="modal-actions">
+          <button class="modal-close" id="closeDlg" type="button">Close</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(dialog);
+    dialog.showModal();
+
+    dialog.querySelector("#closeDlg").addEventListener("click", () => {
+      dialog.close();
+      dialog.remove();
+    });
+    dialog.addEventListener("click", (e) => {
+      const r = dialog.getBoundingClientRect();
+      if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
+        dialog.close();
+        dialog.remove();
+      }
+    });
+  } catch {
+    alert(`${ev.name}`);
+  }
+}
+
 
 // Render the current month when the page loads
 renderCalendar(currentYear, currentMonth);
