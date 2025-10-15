@@ -1,92 +1,102 @@
 /* Base */
 :root {
-    --border: #d7d7d7;
-    --muted: #9aa0a6;
-    --focus: #0b69d3;
-    --bg: #fafafa;
-  }
-  
-  * { box-sizing: border-box; }
-  
-  body {
-    margin: 0;
-    font-family: system-ui, sans-serif;
-    background: var(--bg);
-    color: #222;
-  }
-  
-  /* Header */
-  header {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .75rem;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    background: #f2f2f2;
-    border-bottom: 1px solid var(--border);
-  }
-  
-  h1 { margin: 0; font-size: 1.5rem; }
-  label { font-weight: 600; }
-  select, button { font-size: 1rem; padding: .4rem .6rem; }
-  
-  /* Main layout */
-  main {
-    padding: 1rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-  }
-  
-  /* Calendar */
-  .weekday-row,
-  #calendar {
-    width: 100%;
-    max-width: 900px;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 1px;
-    background: var(--border);
-  }
-  
-  .weekday {
-    background: #f7f7f7;
-    text-align: center;
-    padding: .5rem;
-    font-weight: 600;
-  }
-  
-  #calendar { grid-auto-rows: 120px; }
-  
-  .day {
-    background: #fff;
-    padding: .5rem;
-    display: flex;
-    flex-direction: column;
-    gap: .25rem;
-  }
-  
-  .day.muted {
-    background: #f9f9f9;
-    color: var(--muted);
-  }
-  
-  /* Day button */
-  .daybtn {
-    all: unset;
-    display: block;
-    width: 100%;
-    height: 100%;
-    border-radius: 6px;
-    padding: .4rem;
-    cursor: pointer;
-  }
-  
-  .daybtn:hover,
-  .daybtn:focus {
-    outline: 2px solid var(--focus);
-    background: #e6f3ff;
-  }
-  
+  --border: #d7d7d7;
+  --muted: #9aa0a6;
+  --focus: #0b69d3;
+  --bg: #fafafa;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--bg);
+  color: #222;
+}
+
+/* Header */
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: #f2f2f2;
+  border-bottom: 1px solid var(--border);
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+label {
+  font-weight: 600;
+}
+select,
+button {
+  font-size: 1rem;
+  padding: 0.4rem 0.6rem;
+}
+
+/* Main layout */
+main {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Calendar */
+.weekday-row,
+#calendar {
+  width: 100%;
+  max-width: 900px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--border);
+}
+
+.weekday {
+  background: #f7f7f7;
+  text-align: center;
+  padding: 0.5rem;
+  font-weight: 600;
+}
+
+#calendar {
+  grid-auto-rows: 120px;
+}
+
+.day {
+  background: #fff;
+  padding: 0.5rem;
+}
+
+/* Day button */
+.daybtn {
+  all: unset;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 6px;
+  padding: 0.4rem;
+  cursor: pointer;
+}
+
+.daybtn:hover,
+.daybtn:focus {
+  outline: 2px solid var(--focus);
+  background: #e6f3ff;
+}
+
+.empty {
+  background: #f9f9f9; /* light gray or transparent */
+  border: 1px solid var(--border); /* optional, to match day cells */
+  min-height: 80px; /* same height as day cells */
+}
