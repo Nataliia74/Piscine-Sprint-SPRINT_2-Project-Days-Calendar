@@ -1,7 +1,6 @@
-// generate-ical.mjs
+// generate-ical.mjs (simple version)
 
 import fs from "node:fs/promises";
-import crypto from "node:crypto";
 import daysData from "./days.json" with { type: "json" };
 import {
   getMonthIndex,
@@ -9,122 +8,110 @@ import {
   getOccurrenceWeekdayInMonth,
 } from "./common.mjs";
 
-// -------- Config
+// 1) Config
 const START_YEAR = 2020;
 const END_YEAR   = 2030;
-const LOCALE     = "en-GB"; // pin for deterministic month/weekday names
+const LOCALE     = "en-GB"; // keep things deterministic
 
-// -------- Helpers (RFC5545-friendly)
+// 2) Tiny helpers
 const CRLF = "\r\n";
 
-const pad2 = (n) => String(n).padStart(2, "0");
-const ymd  = (y, m, d) => `${y}${pad2(m + 1)}${pad2(d)}`; // VALUE=DATE form
+function pad2(n) { return String(n).padStart(2, "0"); }
 
-function dtStampUTC() {
-  // YYYYMMDDTHHMMSSZ
+// For all-day events, iCal uses YYYYMMDD (no time)
+function dateYMD(y, m0, d) {
+  return `${y}${pad2(m0 + 1)}${pad2(d)}`;
+}
+
+// DTSTAMP must be UTC in YYYYMMDDTHHMMSSZ
+function utcStamp() {
   return new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
 }
 
+// Escape special characters for ICS text fields (SUMMARY, DESCRIPTION)
 function escapeICS(text = "") {
-  // Escape per RFC5545: backslash, comma, semicolon, newline
   return String(text)
-    .replace(/\\/g, "\\\\")
-    .replace(/\n/g, "\\n")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,");
+    .replace(/\\/g, "\\\\") // backslash
+    .replace(/\n/g, "\\n")  // newline
+    .replace(/;/g, "\\;")   // semicolon
+    .replace(/,/g, "\\,");  // comma
 }
 
-// Fold long lines to <= 75 octets (we'll be conservative at ~72 chars)
-function foldLine(line, width = 72) {
-  const out = [];
-  // We’ll fold by JS chars (safe enough for ASCII / simple text); for full
-  // octet-precision you’d chunk by bytes, but this works well for our content.
-  for (let i = 0; i < line.length; i += width) {
-    out.push(line.slice(i, i + width));
-  }
-  return out.join(CRLF + " ");
+// Simple UID that’s stable per event (good enough here)
+function makeUID(name, ymd) {
+  const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  return `${slug}-${ymd}@dayscalendar`;
 }
 
-// Format a property line with folding
-function prop(name, value) {
-  return foldLine(`${name}:${value}`);
-}
-
-function uidFor(name, dateStr) {
-  const hash = crypto.createHash("sha1").update(`${name}|${dateStr}`).digest("hex");
-  return `${hash}@dayscalendar.local`;
-}
-
-async function safeFetchText(url, fallback) {
+// Fetch plain-text description from the URL (fallback to name)
+async function getDescription(url, name) {
   try {
     const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(res.statusText);
+    if (!res.ok) throw new Error("bad status");
     return (await res.text()).trim();
   } catch {
-    // Keep file importable even offline
-    return fallback;
+    return name; // simple fallback
   }
 }
 
+// Map textual occurrence to the number used by our shared function
 const OCC = { first: 1, second: 2, third: 3, fourth: 4, last: -1 };
 
-// -------- Build VEVENT blocks
+// 3) Build all VEVENTs
 async function buildEvents() {
   const events = [];
 
   for (const d of daysData) {
-    const monthIdx   = getMonthIndex(d.monthName, LOCALE);
-    const weekdayIdx = getWeekDayIndex(d.dayName, LOCALE);
-    const occ        = OCC[d.occurence?.toLowerCase()];
+    const monthIndex   = getMonthIndex(d.monthName, LOCALE);
+    const weekdayIndex = getWeekDayIndex(d.dayName, LOCALE);
+    const occurrence   = OCC[d.occurence?.toLowerCase()];
 
-    for (let y = START_YEAR; y <= END_YEAR; y++) {
-      const dayNum = getOccurrenceWeekdayInMonth(y, monthIdx, weekdayIdx, occ);
-      if (!dayNum) continue;
+    for (let year = START_YEAR; year <= END_YEAR; year++) {
+      const dayNum = getOccurrenceWeekdayInMonth(year, monthIndex, weekdayIndex, occurrence);
+      if (!dayNum) continue; // safety
 
-      const start = ymd(y, monthIdx, dayNum);
-      const end   = ymd(y, monthIdx, dayNum + 1); // all-day DTEND is next day
-      const uid   = uidFor(d.name, start);
+      const start = dateYMD(year, monthIndex, dayNum);
+      const end   = dateYMD(year, monthIndex, dayNum + 1); // all-day DTEND = next day
+      const uid   = makeUID(d.name, start);
 
-      const descRaw = await safeFetchText(d.descriptionURL, d.name);
-      const desc    = escapeICS(descRaw);
+      const rawDesc = await getDescription(d.descriptionURL, d.name);
+      const desc    = escapeICS(rawDesc);
 
-      const lines = [
-        "BEGIN:VEVENT",
-        prop("UID", uid),
-        prop("DTSTAMP", dtStampUTC()),
-        prop("SUMMARY", escapeICS(d.name)),
-        prop("DTSTART;VALUE=DATE", start),
-        prop("DTEND;VALUE=DATE", end),
-        prop("DESCRIPTION", desc),
-        "END:VEVENT",
-      ];
+      const vevent =
+        "BEGIN:VEVENT" + CRLF +
+        `UID:${uid}` + CRLF +
+        `DTSTAMP:${utcStamp()}` + CRLF +
+        `SUMMARY:${escapeICS(d.name)}` + CRLF +
+        `DTSTART;VALUE=DATE:${start}` + CRLF +
+        `DTEND;VALUE=DATE:${end}` + CRLF +
+        `DESCRIPTION:${desc}` + CRLF +
+        "END:VEVENT";
 
-      events.push(lines.join(CRLF));
+      events.push(vevent);
     }
   }
+
   return events;
 }
 
-// -------- Main
+// 4) Main: write days.ics
 async function main() {
-  const header = [
-    "BEGIN:VCALENDAR",
-    "PRODID:-//Days Calendar//CYF//EN",
-    "VERSION:2.0",
-    "CALSCALE:GREGORIAN",
-    "METHOD:PUBLISH",
-    // Optional display name (uncomment if you like):
-    // prop("X-WR-CALNAME", "Commemorative Days"),
-  ].join(CRLF);
+  const header =
+    "BEGIN:VCALENDAR" + CRLF +
+    "PRODID:-//Days Calendar//CYF//EN" + CRLF +
+    "VERSION:2.0" + CRLF +
+    "CALSCALE:GREGORIAN" + CRLF +
+    "METHOD:PUBLISH";
 
   const events = await buildEvents();
+
   const ics = header + CRLF + events.join(CRLF) + CRLF + "END:VCALENDAR" + CRLF;
 
   await fs.writeFile("days.ics", ics, "utf8");
   console.log(`Wrote days.ics with ${events.length} events (${START_YEAR}–${END_YEAR}).`);
 }
 
-main().catch((err) => {
+main().catch(err => {
   console.error("Failed to build days.ics:", err);
   process.exit(1);
 });
