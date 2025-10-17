@@ -1,4 +1,3 @@
-// import { getGreeting } from "./common.mjs";
 import assert from "node:assert/strict";
 import test from "node:test";
 import { getMonthIndex } from "./common.mjs";
@@ -6,36 +5,36 @@ import { getWeekDayIndex } from "./common.mjs";
 import { getCommemorativeDayOfMonth } from "./common.mjs";
 import { getOccurrenceWeekdayInMonth } from "./common.mjs";
 
-// test("Greeting is correct", () => {
-//   assert.equal(getGreeting(), "Hello");
-// });
+
+
+
 test("getMonthIndex should return 9 for October", () => {
-  assert.strictEqual(getMonthIndex("October", "en"), 9);
+  assert.strictEqual(getMonthIndex("October", "en-GB"), 9);
 });
 
 test("getMonthIndex should return 0 for January", () => {
-  assert.strictEqual(getMonthIndex("JANUARY", "en"), 0);
+  assert.strictEqual(getMonthIndex("JANUARY", "en-GB"), 0);
 });
 
 test("getMonthIndex should return 'There is no such month' for For", () => {
-  assert.throws(() => (getMonthIndex("For", "en"), "There is no such month"));
+  assert.throws(() => (getMonthIndex("For", "en-GB"), "There is no such month"));
 });
 
 test("getWeekDayIndex should return 0 for Sunday", () => {
-  assert.strictEqual(getWeekDayIndex("Sunday", "en"), 0);
+  assert.strictEqual(getWeekDayIndex("Sunday", "en-GB"), 0);
 });
 
 test("getWeekDayIndex should return 2 for Tuesday", () => {
-  assert.strictEqual(getWeekDayIndex("Tuesday", "en"), 2);
+  assert.strictEqual(getWeekDayIndex("Tuesday", "en-GB"), 2);
 });
 
 test("getWeekDayIndex should return 2 for Tuesday", () => {
-  assert.strictEqual(getWeekDayIndex("TUESDAY", "en"), 2);
+  assert.strictEqual(getWeekDayIndex("TUESDAY", "en-GB"), 2);
 });
 
 test("getWeekDayIndex should return 'There is no such weekday' for GG", () => {
   assert.throws(
-    () => (getWeekDayIndex("GG", "en"), "There is no such weekday")
+    () => (getWeekDayIndex("GG", "en-GB"), "There is no such weekday")
   );
 });
 
@@ -64,23 +63,26 @@ test("getOccurrenceWeekdayInMonth should return 'null'", () => {
 });
 
 test("getCommemorativeDayOfMonth should return 'International Binturong Day' 11.05.2024", () => {
-  assert.deepStrictEqual(getCommemorativeDayOfMonth(2024, 4, "en"), [
+  assert.deepStrictEqual(getCommemorativeDayOfMonth(2024, 4, "en-GB"), [
     {
       name: "International Binturong Day",
       date: 11,
+      descriptionURL: "https://codeyourfuture.github.io/The-Piscine/days/binturongs.txt"
     },
   ]);
 });
 
 test("getCommemorativeDayOfMonth should return several commemorative days if month has several", () => {
-  assert.deepStrictEqual(getCommemorativeDayOfMonth(2024, 8, "en"), [
+  assert.deepStrictEqual(getCommemorativeDayOfMonth(2024, 8, "en-GB"), [
     {
       name: "International Vulture Awareness Day",
       date: 7,
+      descriptionURL:"https://codeyourfuture.github.io/The-Piscine/days/vultures.txt"
     },
     {
       name: "International Red Panda Day",
       date: 21,
+      descriptionURL: "https://codeyourfuture.github.io/The-Piscine/days/red-pandas.txt"
     },
   ]);
 });

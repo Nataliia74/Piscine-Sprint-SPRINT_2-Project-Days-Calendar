@@ -1,10 +1,4 @@
-// This is a placeholder file which shows how you can access functions and data defined in other files.
-// It can be loaded into index.html.
-// Note that when running locally, in order to open a web page which uses modules, you must serve the directory over HTTP e.g. with https://www.npmjs.com/package/http-server
-// You can't open the index.html file using a file:// URL.
 
-// import { getGreeting } from "./common.mjs";
-import daysData from "./days.json" with { type: "json" };
 import { getCommemorativeDayOfMonth } from "./common.mjs";
 
 const calendar = document.getElementById("calendar");
@@ -13,12 +7,12 @@ const prevBtn = document.getElementById("prevBtn");
 const nextBtn = document.getElementById("nextBtn");
 const monthSelect = document.getElementById("monthSelect");
 const yearSelect = document.getElementById("yearSelect")
-
+const LOCALE     = "en-GB"; 
 const today = new Date();
 const currentYear = today.getFullYear();
 const currentMonth = today.getMonth();
-const startYear = currentYear - 50;
-const endYear = currentYear + 50; 
+const startYear =   1900;
+const endYear = 2050; 
 
 for (let year = startYear; year <= endYear; year++) {
   const option = document.createElement("option");
@@ -82,16 +76,16 @@ prevBtn.addEventListener("click", () => {
   updateCalendar();
 })
 
-// Function to count how many days are in a month
+
 function daysInMonth(year, month) {
   return new Date(year, month + 1, 0).getDate();
 }
 
-// Function to render the days of a month
+
 function renderCalendar(year, month) {
-  // Clear any previous calendar content
+
   calendar.innerHTML = "";
-  const commemorativeDays = getCommemorativeDayOfMonth(year, month, "en");
+  const commemorativeDays = getCommemorativeDayOfMonth(year, month, LOCALE);
 
   const numDays = daysInMonth(year, month);
 
@@ -113,7 +107,7 @@ function renderCalendar(year, month) {
       dayDiv.classList.add("commemorative");
       dayDiv.title = `${commemorative.name} — click for details`;
 
-      // Make the whole cell interactive & accessible
+
       dayDiv.tabIndex = 0;
       dayDiv.setAttribute("role", "button");
 
@@ -122,7 +116,7 @@ function renderCalendar(year, month) {
       label.textContent = commemorative.name;
       dayDiv.appendChild(label);
 
-      // Open details on click/keyboard
+
       const open = () => showDescription(commemorative, year, month, day);
       dayDiv.addEventListener("click", open);
       dayDiv.addEventListener("keydown", (e) => {
@@ -135,7 +129,7 @@ function renderCalendar(year, month) {
     calendar.appendChild(dayDiv);
   }
 
-  // Fill trailing empty cells to complete a 7×6 grid
+
   const totalCells = startDay + numDays;
   const trailing = 42 - totalCells;
   for (let i = 0; i < trailing; i++) {
@@ -173,8 +167,7 @@ async function showDescription(ev, y, m, d) {
       dialog.remove();
     });
     dialog.addEventListener("click", (e) => {
-      const r = dialog.getBoundingClientRect();
-      if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
+      if (e.target === dialog) {
         dialog.close();
         dialog.remove();
       }
@@ -185,5 +178,5 @@ async function showDescription(ev, y, m, d) {
 }
 
 
-// Render the current month when the page loads
+
 renderCalendar(currentYear, currentMonth);
