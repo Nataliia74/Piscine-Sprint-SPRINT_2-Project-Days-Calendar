@@ -1,10 +1,5 @@
 
-// This is a placeholder file which shows how you can define functions which can be used from both a browser script and a node script. You can delete the contents of the file once you have understood how it works.
 import daysData from "./days.json" with { type: "json" };
-
-// export function getGreeting() {
-//   return "Hello";
-// }
 
 
 export function getMonthIndex(monthName, locale = (typeof navigator !== "undefined" ? navigator.language : "en-GB")) {
@@ -62,12 +57,11 @@ export function getOccurrenceWeekdayInMonth (year, monthIndex, weekdayIndex, occ
     throw new Error("Invalid occurrence");
   }
 
-  return null; // if the month doesn’t have that occurrence
+  return null; 
 }
 
 export function getCommemorativeDayOfMonth(year, monthIndex, locale = (typeof navigator !== "undefined" ? navigator.language : "en-GB")) {
   let arrayResults =[];
-  // const year = new Date().getFullYear();
 
  
   for (let day of daysData) {
